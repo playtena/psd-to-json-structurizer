@@ -16,7 +16,7 @@ function Structurizer() {
         // show each "top level" layer, export a trimmed version
         var metadata = PsdUtils.getDocumentMetadata(this.document);
         if (metadata.layers.length > 0) {
-            FileUtils.saveFile(outputFolder + "/" + metadata.name + "_metadata.json", JSON.stringify(metadata));
+            FileUtils.saveFile(outputFolder + "/" + metadata.name + ".json", JSON.stringify(metadata));
         }
         this.restoreLayersOriginalVisibility();
     };
@@ -34,7 +34,7 @@ function Structurizer() {
         for (var i = 0; i < layers.length; i++) {
             layers[i].visible = this.originalVisibilityList[i];
         }
-    }
+    };
 
-}
+};
 
