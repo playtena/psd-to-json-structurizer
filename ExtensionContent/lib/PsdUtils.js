@@ -27,14 +27,9 @@ PsdUtils.getDocumentMetadata = function (document) {
 PsdUtils.getLayersMetadata = function (document, layers) {
     var layersMetadata = [];
     for (var i = 0; i < layers.length; i++) {
-        switch (layers[i].name.substr(0, 1)) {
-            case ".":
-                // ignore
-                break;
-            default:
-                var layerMetadata = PsdUtils.layerMetadata(document, layers[i], i);
-                layersMetadata.push(layerMetadata);
-        }
+    	if (layers[i].name.substr(0, 1) != "."/*ignoring layers with name starting "."*/){
+    		layersMetadata.push(PsdUtils.layerMetadata(document, layers[i], i));
+    	}
     }
     return layersMetadata;
 };
@@ -206,9 +201,9 @@ PsdUtils.getLayerKind = function (layer) {
             break;
         default :
             if (layer.typename == "LayerSet") {
-                return "sprite"
+                return "sprite";
             }
-            throw new Error("Layers kind can be only on from [TEXT, SMARTOBJECT, NORMAL]");
             break;
     }
+    throw new Error("Layers kind can be only on from [TEXT, SMARTOBJECT, NORMAL]");
 };

@@ -37,6 +37,13 @@
 							<Width>150</Width>
 						</Size>
 					</Geometry>
+					<Icons>
+						<Icon Type="Normal">./icon/p2j_icon.png</Icon>
+						<Icon Type="RollOver">./icon/p2j_icon.png</Icon>
+						<Icon Type="Disabled">./icon/p2j_icon.png</Icon>
+						<Icon Type="DarkNormal">./icon/p2j_icon.png</Icon>
+						<Icon Type="DarkRollOver">./icon/p2j_icon.png</Icon>
+					</Icons>
 				</UI>
 			</DispatchInfo>
 		</Extension>

@@ -4,11 +4,9 @@ function onLoaded() {
 	
     
     var appName = csInterface.hostEnvironment.appName;
-    
     if(appName != "FLPR"){
     	loadJSX();
-    }    
-    
+    }   
     var appNames = ["PHXS"];
     for (var i = 0; i < appNames.length; i++) {
         var name = appNames[i];
