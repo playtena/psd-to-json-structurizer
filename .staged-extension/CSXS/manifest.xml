@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<ExtensionManifest Version="4.0" ExtensionBundleId="com.plexonic.pstj" ExtensionBundleVersion="0.0.1"
+<ExtensionManifest Version="4.0" ExtensionBundleId="com.plexonic.pstj" ExtensionBundleVersion="0.0.2"
 		ExtensionBundleName="PsdToJson" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
 		<Extension Id="com.plexonic.pstj" Version="0.1" />
