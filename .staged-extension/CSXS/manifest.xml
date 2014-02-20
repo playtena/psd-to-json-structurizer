@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<ExtensionManifest Version="4.0" ExtensionBundleId="com.plexonic.pstj" ExtensionBundleVersion="0.0.2"
+<ExtensionManifest Version="4.0" ExtensionBundleId="com.plexonic.pstj" ExtensionBundleVersion="0.0.3"
 		ExtensionBundleName="PsdToJson" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
 		<Extension Id="com.plexonic.pstj" Version="0.1" />
@@ -38,11 +38,11 @@
 						</Size>
 					</Geometry>
 					<Icons>
-						<Icon Type="Normal">./icon/p2j_icon.png</Icon>
-						<Icon Type="RollOver">./icon/p2j_icon.png</Icon>
-						<Icon Type="Disabled">./icon/p2j_icon.png</Icon>
-						<Icon Type="DarkNormal">./icon/p2j_icon.png</Icon>
-						<Icon Type="DarkRollOver">./icon/p2j_icon.png</Icon>
+						<Icon Type="Normal">./icons/icon-active.png</Icon>
+						<Icon Type="RollOver">./icons/icon-over.png</Icon>
+						<Icon Type="Disabled">./icons/icon-disable.png</Icon>
+						<Icon Type="DarkNormal">./icons/icon-dark-active.png</Icon>
+						<Icon Type="DarkRollOver">./icons/icon-dark-over.png</Icon>
 					</Icons>
 				</UI>
 			</DispatchInfo>

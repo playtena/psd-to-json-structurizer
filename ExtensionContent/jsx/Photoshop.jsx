@@ -14,7 +14,7 @@ $._ext_PHXS={
         		try {
 	        		var structurizer = new Structurizer();
 	        		structurizer.structurize(document, outputFolder);
-	        		alert("DONE!");
+	        		alert("Process completed successfully!");
 			    } catch (e) {
 			    	alert("P2J : " + e);
 			    }

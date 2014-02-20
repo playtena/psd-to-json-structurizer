@@ -232,7 +232,7 @@ PsdUtils.crateLayerGenericMetadata = function(name, layer, layerIndex) {
 		rotation : 0,
 		scaleX : 1,
 		scaleY : 1,
-		opacity : layer.opacity,
+		opacity : layer.opacity / 100,
 		fillOpacity : layer.fillOpacity,
 		kind : PsdUtils.getLayerKind(layer), // layer.kind,
 		layerIndex : layerIndex
@@ -241,19 +241,21 @@ PsdUtils.crateLayerGenericMetadata = function(name, layer, layerIndex) {
 
 PsdUtils.getLayerKind = function(layer) {
 	switch (layer.kind) {
-	case LayerKind.TEXT:
-		return "text";
-		break;
-	case LayerKind.SMARTOBJECT:
-	case LayerKind.NORMAL:
-		return "image";
-		break;
-	default:
-		if (layer.typename == "LayerSet") {
-			return "sprite";
-		}
-		break;
+		case LayerKind.TEXT:
+			return "text";
+			break;
+		case LayerKind.SOLIDFILL:
+			return "quad";
+			break;
+		case LayerKind.SMARTOBJECT:
+		case LayerKind.NORMAL:
+			return "image";
+			break;
+		default:
+			if (layer.typename == "LayerSet") {
+				return "sprite";
+			}
+			break;
 	}
-	throw new Error(
-			"Layers kind can be only on from [TEXT, SMARTOBJECT, NORMAL]");
+	throw new Error("Layers kind can be only on from [TEXT, SMARTOBJECT, NORMAL, SOLIDFILL]");
 };
