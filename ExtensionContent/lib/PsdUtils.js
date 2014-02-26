@@ -40,9 +40,22 @@ PsdUtils.layerMetadata = function(document, layer, layerIndex) {
 	var nameParts = layer.name.split('$');
 	var layerMetadata = PsdUtils.crateLayerGenericMetadata(nameParts[0], layer,
 			layerIndex);
-	PsdUtils.setLayerPin(nameParts[1], layerMetadata);
-	PsdUtils.setLayerRotation(nameParts[1], layerMetadata);
-	PsdUtils.setLayerScale(nameParts[1], layerMetadata);
+	if(nameParts[1]){
+		if(layerMetadata.scaleX != 1 || layerMetadata.scaleY != 1){
+			PsdUtils.setLayerPivot([0,0.5,0.5], layerMetadata);
+		}
+		var rotation = (new RegExp("r\\(([-0-9.]+)\\)", "gi")).exec(nameParts[1]);
+		if (rotation && rotation[1]) {
+			PsdUtils.setLayerRotation(rotation, layerMetadata);
+			PsdUtils.setLayerPivot([0,0.5,0.5], layerMetadata);
+		}
+		var pivot = (new RegExp("p\\(([-0-9.]+),([-0-9.]+)\\)", "gi")).exec(nameParts[1]);
+		if (pivot) {
+			if(pivot[1] || pivot[2]){
+				PsdUtils.setLayerPivot(pivot, layerMetadata);
+			}
+		}
+	}
 	PsdUtils.setLayerSpecificMetadata(layerMetadata, layer);
 	if (layer.typename == "LayerSet") {
 		layerMetadata.layers = PsdUtils.getLayersMetadata(document,
@@ -51,48 +64,54 @@ PsdUtils.layerMetadata = function(document, layer, layerIndex) {
 	return layerMetadata;
 };
 
-PsdUtils.setLayerScale = function(rawName, layerMetadata) {
-	if (rawName) {
-		var pin = (new RegExp("t\\(([-0-9.]+),([-0-9.]+)\\)", "gi")).exec(rawName);
-		if (!pin){
-			return;
-		}
-		if (pin[1]) {
-			layerMetadata.scaleX = parseFloat(pin[1]);
-		}
-		if (pin[2]) {
-			layerMetadata.scaleY = parseFloat(pin[2]);
-		}
+PsdUtils.setLayerScale = function(scale, layerMetadata) {
+	if (scale[1]) {
+		layerMetadata.scaleX = parseFloat(scale[1]);
+//		layerMetadata.width = layerMetadata.width/layerMetadata.scaleX;
+	}
+	if (scale[2]) {
+		layerMetadata.scaleY = parseFloat(scale[2]);
+//		layerMetadata.height = layerMetadata.height/layerMetadata.scaleY;
 	}
 };
 
-PsdUtils.setLayerRotation = function(rawName, layerMetadata) {
-	if (rawName) {
-		var pin = (new RegExp("r\\(([-0-9.]+)\\)", "gi")).exec(rawName);
-		if (!pin){
-			return;
-		}
-		if (pin[1]) {
-			layerMetadata.rotation =  parseFloat(pin[1]) / 180.0 * Math.PI;//Converts an angle from degrees into radians
-		}
-		
+PsdUtils.setLayerRotation = function(rotation, layerMetadata) {
+	layerMetadata.rotation =  parseFloat(rotation[1]) / 180.0 * Math.PI;//Converts an angle from degrees into radians
+};
+
+PsdUtils.setLayerPivot = function(pivot, layerMetadata) {
+	if (pivot[1]) {
+		layerMetadata.pivotX = parseFloat(pivot[1]) * layerMetadata.width;
+		layerMetadata.left += layerMetadata.pivotX; 
+	}
+	if (pivot[2]) {
+		layerMetadata.pivotY = parseFloat(pivot[2]) * layerMetadata.height;
+		layerMetadata.top += layerMetadata.pivotY; 
 	}
 };
 
-PsdUtils.setLayerPin = function(rawName, layerMetadata) {
-	if (rawName) {
-		var pin = (new RegExp("p\\(([-0-9.]+),([-0-9.]+)\\)", "gi")).exec(rawName);
-		if (!pin){
-			return;
-		}
-		if (pin[1]) {
-			layerMetadata.pinX = parseFloat(pin[1]) * layerMetadata.width;
-		}
-		if (pin[2]) {
-			layerMetadata.pinY = parseFloat(pin[2]) * layerMetadata.height;
-		}
+
+PsdUtils.getLayerOriginalWidth = function(layer, scaleX) {
+	if(layer.kind == LayerKind.TEXT){
+		var textItem = layer.textItem;
+		return parseInt(textItem.width.value)/scaleX;
+	}else{
+		var leftBound = PsdUtils.normalizeDimension(layer.bounds[0]);
+		return (PsdUtils.normalizeDimension(layer.bounds[2]) - leftBound)/scaleX;
 	}
 };
+
+PsdUtils.getLayerOriginalHeight = function(layer, scaleY) {
+	if(layer.kind == LayerKind.TEXT){
+		var textItem = layer.textItem;
+		var heightAdjustment = Math.ceil(parseInt(textItem.size) * .4);
+		return (parseInt(textItem.height.value) + heightAdjustment)/scaleY;
+	}else{
+		var topBound = PsdUtils.normalizeDimension(layer.bounds[1]);
+		return (PsdUtils.normalizeDimension(layer.bounds[3]) - topBound)/scaleY;
+	}
+};
+
 
 PsdUtils.setLayerSpecificMetadata = function(layerMetadata, layer) {
 	switch (layer.kind) {
@@ -173,10 +192,8 @@ PsdUtils.setTextLayerMetadata = function(layerMetadata, layer) {
 	layerMetadata.letterSpacing = letterSpacing;
 	layerMetadata.lineHeight = lineHeight;
 	layerMetadata.effects = effects;
-	layerMetadata.width = parseInt(textItem.width.value);
-	layerMetadata.height = parseInt(textItem.height.value) + heightAdjustment;
-	layerMetadata.left = PsdUtils.normalizeDimension(textItem.position[0]) + ((layerMetadata.width * layerMetadata.scaleX) >> 1);
-	layerMetadata.top = PsdUtils.normalizeDimension(textItem.position[1]) - heightAdjustment  +  ((parseInt(textItem.height.value) * layerMetadata.scaleY) >> 1);
+	layerMetadata.left = PsdUtils.normalizeDimension(textItem.position[0]); //+ ((layerMetadata.width * layerMetadata.scaleX) >> 1);
+	layerMetadata.top = PsdUtils.normalizeDimension(textItem.position[1]) - heightAdjustment; // +  ((parseInt(textItem.height.value) * layerMetadata.scaleY) >> 1);
 };
 
 PsdUtils.getTextItemJustification = function(textItem) {
@@ -219,23 +236,44 @@ PsdUtils.activeLayerHasEffects = function() {
 };
 
 PsdUtils.crateLayerGenericMetadata = function(name, layer, layerIndex) {
+	
+	var scaleX = 1;
+	var scaleY = 1;
+	var nameParts = layer.name.split('$');
+	if(nameParts[1]){
+		var scale = (new RegExp("t\\(([-0-9.]+),([-0-9.]+)\\)", "gi")).exec(nameParts[1]);
+		if (scale) {
+			if(scale[1]){
+				scaleX = scale[1];
+			}
+			if(scale[2]){
+				scaleY = scale[2];
+			}
+		}
+	}
+	var layerOriginalWidth = PsdUtils.getLayerOriginalWidth(layer, scaleX);
+	var layerOriginalHeight = PsdUtils.getLayerOriginalHeight(layer,scaleY);
+	var width = layerOriginalWidth* scaleX;
+	var height = layerOriginalHeight* scaleY;
+	
+	
 	var leftBound = PsdUtils.normalizeDimension(layer.bounds[0]);
-	var rightBound = PsdUtils.normalizeDimension(layer.bounds[1]);
-	var width = PsdUtils.normalizeDimension(layer.bounds[2]) - leftBound;
-	var height = PsdUtils.normalizeDimension(layer.bounds[3]) - rightBound;
+	var topBound = PsdUtils.normalizeDimension(layer.bounds[1]);
 	return {
 		name : name,
-		left : leftBound + (width >> 1),
-		top : rightBound + (height >> 1),
-		width : width,
-		height : height,
+		left : leftBound - (layerOriginalWidth - width)/2,
+		top : topBound - (layerOriginalHeight - height)/2,
+		width : layerOriginalWidth,
+		height : layerOriginalHeight,
 		rotation : 0,
-		scaleX : 1,
-		scaleY : 1,
+		scaleX : scaleX,
+		scaleY : scaleY,
+		pivotX : 0,
+		pivotY : 0,
 		opacity : layer.opacity / 100,
 		fillOpacity : layer.fillOpacity,
 		kind : PsdUtils.getLayerKind(layer), // layer.kind,
-		layerIndex : layerIndex
+		layerIndex : layerIndex,
 	};
 };
 
